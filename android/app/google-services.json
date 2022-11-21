@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "203611034997",
+    "project_id": "confide-with-stranger",
+    "storage_bucket": "confide-with-stranger.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:203611034997:android:3cedd8907a343abe582f3c",
+        "android_client_info": {
+          "package_name": "com.example.confide_with_stranger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "203611034997-h5au7ib9eee2jkp2se8aoecgsa97jpkr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkhVSO6T-BpKnHuXBDfROIUUH2qBA8lR4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "203611034997-h5au7ib9eee2jkp2se8aoecgsa97jpkr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
