@@ -111,7 +111,7 @@ class _SignInState extends State<SignIn> {
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => SignUp(),
+                              builder: (context) => const SignUp(),
                             ),
                           );
                         },
@@ -134,8 +134,8 @@ class _SignInState extends State<SignIn> {
     });
     Authentication().signInByGoogle().then((isSuccessful) {
       if (isSuccessful) {
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => HomePage()));
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => const HomePage()));
       } else {
         setState(() {
           _isLoading = false;
@@ -162,8 +162,12 @@ class _SignInState extends State<SignIn> {
             _emailController.text, _passwordController.text)
         .then((isSuccessful) {
       if (isSuccessful) {
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => HomePage()));
+        setState(() {
+          _isLoading = false;
+        });
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
       } else {
         setState(() {
           _isLoading = false;
@@ -171,7 +175,6 @@ class _SignInState extends State<SignIn> {
         _passwordController.clear();
       }
     }).catchError((err) {
-      _isLoading = false;
       _passwordController.clear();
       showSnackBar(context, err.toString());
       setState(() {

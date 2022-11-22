@@ -6,6 +6,7 @@ AppBar appBarMain(
     backgroundColor: Colors.blueGrey,
     title: Text(title ?? ""),
     actions: actions,
+    automaticallyImplyLeading: false,
   );
 }
 

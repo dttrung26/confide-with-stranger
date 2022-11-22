@@ -17,8 +17,8 @@ class CacheHelper {
   //Get logged in user from SF
   Future<bool?> getUserLoggedInStatus() async {
     final prefs = await SharedPreferences.getInstance();
-    // If user logged in, return true. Return null if otherwise
-    return prefs.getBool(userLoggedInKey);
+    // If user logged in, return true. Return false if otherwise
+    return prefs.getBool(userLoggedInKey) ?? false;
   }
 
   Future<void> saveUserData(UserModel user) async {

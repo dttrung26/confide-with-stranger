@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confide_with_stranger/service/auth.dart';
+import 'package:confide_with_stranger/view/signin.dart';
 import 'package:flutter/material.dart';
 
+import '../extension/cache_helper.dart';
 import '../extension/logs.dart';
 import '../widget/common_widget.dart';
 
@@ -15,25 +17,27 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _chatTxtController = TextEditingController();
   FirebaseFirestore db = FirebaseFirestore.instance;
-
   @override
   void initState() {
-    // TODO: implement initState
+    _checkSignedIn();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBarMain(title: "CFWSTR", context: context, actions: [
-        IconButton(
-          onPressed: () {
-            _userLogout();
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.logout),
-        ),
-      ]),
+      appBar: appBarMain(
+        title: "CFWSTR",
+        context: context,
+        actions: [
+          IconButton(
+            onPressed: () {
+              _userLogout();
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -79,8 +83,18 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _checkSignedIn() async {
+    bool isSignedIn = await CacheHelper().getUserLoggedInStatus() ?? false;
+    if (!isSignedIn) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const SignIn()),
+          (route) => false);
+    }
+  }
+
   _userLogout() {
     Authentication().signOut();
-    Navigator.of(context).pop();
+    Navigator.of(context).canPop() ? Navigator.of(context).pop() : null;
   }
 }

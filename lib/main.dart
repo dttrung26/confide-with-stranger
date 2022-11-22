@@ -1,7 +1,4 @@
-import 'package:confide_with_stranger/extension/cache_helper.dart';
 import 'package:confide_with_stranger/view/home_page.dart';
-import 'package:confide_with_stranger/view/signin.dart';
-import 'package:confide_with_stranger/view/signup.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -19,14 +16,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var _isUserLoggedIn = false;
-
   @override
-  void initState() {
-    _getLoggedInUserStatus();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -34,16 +24,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      routes: {
-        '/': (context) => HomePage(),
-        '/signIn': (context) => SignIn(),
-        '/signUp': (context) => SignUp(),
-      },
+      home: const HomePage(),
     );
-  }
-
-  _getLoggedInUserStatus() async {
-    _isUserLoggedIn =
-        await CacheHelper().getUserLoggedInStatus() != null ? false : true;
   }
 }

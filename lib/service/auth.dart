@@ -47,22 +47,33 @@ class Authentication {
             "created_at": DateTime.now().toString(),
             "email": firebaseUser.email
           });
+          //Get user fromfirebase firestore
+          final docRef =
+              _firebaseFirestore.collection("users").doc(firebaseUser.uid);
+          docRef.get().then((DocumentSnapshot doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            UserModel user = UserModel.fromJson(data);
+            //Save user data to local cache
+            CacheHelper().saveUserData(user);
+          });
+          await CacheHelper().setUserLoggedInStatus(true);
+          // //Otherwise, user has valid credential and valid query snapshot
+          // //Then get user data from firebase firestore
+          // DocumentSnapshot documentSnapshot = documents[0];
+          // UserModel user = UserModel.fromJson(
+          //     documentSnapshot.data() as Map<String, dynamic>);
+          // //Then write user data on local cache
+          // CacheHelper().saveUserData(user);
+          return true;
         } else {
-          //Otherwise, user has valid credential and valid query snapshot
-          //Then get user data from firebase firestore
-          DocumentSnapshot documentSnapshot = documents[0];
-          UserModel user = UserModel.fromJson(
-              documentSnapshot.data() as Map<String, dynamic>);
-          //Then write user data on local cache
-          CacheHelper().saveUserData(user);
+          //Fail with query in firebase firestore
+          return false;
         }
-        return true;
       } else {
-        //Fail with query in firebase firestore
+        // Fail with google sign in
         return false;
       }
     } else {
-      // Fail with google sign in
       return false;
     }
   }
@@ -93,6 +104,7 @@ class Authentication {
           // Save user data on local cache
           CacheHelper().saveUserData(user);
         });
+        await CacheHelper().setUserLoggedInStatus(true);
         return true;
       } else {
         return false;
@@ -119,6 +131,7 @@ class Authentication {
         UserModel user = UserModel.fromJson(data);
         // then save user data in local cache
         CacheHelper().saveUserData(user);
+        CacheHelper().setUserLoggedInStatus(true);
         return true;
       } else {
         return false;
