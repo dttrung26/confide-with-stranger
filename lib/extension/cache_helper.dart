@@ -6,7 +6,8 @@ class CacheHelper {
   static String userLoggedInKey = "CFWSTR_USER_LOGGED_IN_KEY";
   static String userNameKey = "CFWSTR_USER_NAME_KEY";
   static String userEmailKey = "CFWSTR_USER_EMAIL_KEY";
-  static String userProfilePicture = "CFWSTR_USER_PROFILE_PICTURE_KEY";
+  static String userProfilePictureKey = "CFWSTR_USER_PROFILE_PICTURE_KEY";
+  static String userIdKey = "CFWSTR_USER_ID_KEY";
 
   //Save logged in user in SF
   Future<void> setUserLoggedInStatus(bool value) async {
@@ -25,7 +26,13 @@ class CacheHelper {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(userNameKey, user.displayName);
     await prefs.setString(userEmailKey, user.email);
+    await prefs.setString(userIdKey, user.uid);
     //TODO: profile picture must be handled
-    await prefs.setString(userProfilePicture, user.profilePicture!);
+    await prefs.setString(userProfilePictureKey, user.profilePicture!);
+  }
+
+  Future<String?> getCurrentUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(userIdKey);
   }
 }

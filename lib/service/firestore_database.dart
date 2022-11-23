@@ -1,8 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:confide_with_stranger/extension/logs.dart';
+
+import '../model/user_model.dart';
 
 class FirestoreDatabase {
-  final FirebaseFirestore _fireStoreDatabase = FirebaseFirestore.instance;
+  final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
 
+  Future<void> sendMessage(
+      {required message,
+      required docId,
+      required senderId,
+      required receiverId}) async {
+    _firebaseFirestore
+        .collection('rooms')
+        .doc(docId)
+        .collection('messages')
+        .add({
+      'text': message,
+      'from': senderId,
+      'to': receiverId,
+      'time': DateTime.now().toString(),
+    });
+  }
+
+  Future<UserModel?> getUserByUid(String uid) async {
+    final docRef = _firebaseFirestore.collection("users").doc(uid);
+    try {
+      DocumentSnapshot doc = await docRef.get();
+      final data = doc.data() as Map<String, dynamic>;
+      UserModel user = UserModel.fromJson(data);
+      return user;
+    } catch (e) {
+      printLog(e);
+      return null;
+    }
+  }
   // Future setUserData(User? user) async {
   //   try {
   //     if (user != null) {
