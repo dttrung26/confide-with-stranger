@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confide_with_stranger/service/auth.dart';
 import 'package:confide_with_stranger/service/firestore_database.dart';
+import 'package:confide_with_stranger/view/chat.dart';
 import 'package:confide_with_stranger/view/signin.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,21 +48,6 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            InkWell(
-              onTap: () {
-                // Navigator.of(context).push(
-                //   MaterialPageRoute(
-                //     builder: (context) => ChatScreen(
-                //       senderUser: null,
-                //     ),
-                //   ),
-                // );
-              },
-              child: const Text(
-                "Chat Screen",
-                style: TextStyle(color: Colors.blueAccent),
-              ),
-            ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: _chatListStream,
@@ -118,7 +104,16 @@ class _HomePageState extends State<HomePage> {
     Map<String, dynamic> data = snapshot.data()! as Map<String, dynamic>;
     if (peerUser != null) {
       return GestureDetector(
-        onTap: () {},
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                currentUserId: currentUserId,
+                peerUser: peerUser,
+              ),
+            ),
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.only(bottom: 10.0),
           child: Card(

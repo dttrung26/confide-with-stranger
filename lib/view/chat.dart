@@ -1,14 +1,14 @@
+import 'package:confide_with_stranger/view/chat_screen/messages.dart';
 import 'package:flutter/material.dart';
 
 import '../model/user_model.dart';
 import '../service/firestore_database.dart';
 
-//Default owner uid: jdEzxGaMOwZwvx67zswKTSW2Dqw1
-
 class ChatScreen extends StatefulWidget {
-  final UserModel senderUser;
-  final String? receiverId;
-  const ChatScreen({Key? key, required this.senderUser, this.receiverId})
+  final String currentUserId;
+  final UserModel peerUser;
+  const ChatScreen(
+      {Key? key, required this.currentUserId, required this.peerUser})
       : super(key: key);
 
   @override
@@ -19,12 +19,22 @@ class _ChatScreenState extends State<ChatScreen> {
   final messageTextController = TextEditingController();
   final firebaseFireStore = FirestoreDatabase();
   String messagesText = '';
+  String chatRoomId =
+      'WxiNPb8nhKMqscq8l1FLxOiBi7P2-Y0aVHp3JeCeh623XSbLQMQZ0tas2';
+  @override
+  void initState() {
+    //TODO: disable for testing for now, enable later
+    //Compare string order of two users id to generate a unique chat room id
+    // if (widget.currentUserId.compareTo(widget.peerUser.uid) > 0) {
+    //   chatRoomId = '${widget.peerUser.uid}-${widget.currentUserId}';
+    // } else {
+    //   chatRoomId = '${widget.currentUserId}-${widget.peerUser.uid}';
+    // }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    //TODO: replace receiverId
-    String docId = '${widget.senderUser.uid}-jdEzxGaMOwZwvx67zswKTSW2Dqw1';
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -44,6 +54,11 @@ class _ChatScreenState extends State<ChatScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Flexible(
+                child: MessageStream(
+                  chatRoomId: chatRoomId,
+                ),
+              ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
@@ -66,12 +81,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: () {
                       messageTextController.clear();
                       if (messagesText.isNotEmpty) {
-                        //TODO: Send Message
                         firebaseFireStore.sendMessage(
                             message: messagesText,
-                            docId: docId,
-                            senderId: widget.senderUser.uid,
-                            receiverId: widget.receiverId);
+                            docId: chatRoomId,
+                            senderId: widget.currentUserId);
                       }
                       messagesText = '';
                     },

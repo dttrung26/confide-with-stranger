@@ -6,19 +6,18 @@ import '../model/user_model.dart';
 class FirestoreDatabase {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
 
-  Future<void> sendMessage(
-      {required message,
-      required docId,
-      required senderId,
-      required receiverId}) async {
+  Future<void> sendMessage({
+    required message,
+    required docId,
+    required senderId,
+  }) async {
     _firebaseFirestore
         .collection('rooms')
         .doc(docId)
         .collection('messages')
         .add({
-      'text': message,
+      'content': message,
       'from': senderId,
-      'to': receiverId,
       'time': DateTime.now().toString(),
     });
   }
@@ -35,6 +34,7 @@ class FirestoreDatabase {
       return null;
     }
   }
+
   // Future setUserData(User? user) async {
   //   try {
   //     if (user != null) {
