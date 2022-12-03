@@ -2,15 +2,19 @@ class UserModel {
   String uid;
   String displayName;
   String email;
-  String? profilePicture;
+  String profilePicture;
   String createdAt;
+  String? lastSeen;
+  bool isOnline;
 
   UserModel(
       {required this.uid,
       required this.displayName,
       required this.email,
-      this.profilePicture,
-      required this.createdAt});
+      required this.profilePicture,
+      required this.createdAt,
+      required this.isOnline,
+      this.lastSeen});
 
   Map<String, dynamic> toJson() {
     return {
@@ -18,16 +22,27 @@ class UserModel {
       'display_name': displayName,
       'email': email,
       'profile_picture': profilePicture,
-      'uid': uid
+      'uid': uid,
+      'last_seen': lastSeen,
+      'is_online': isOnline
     };
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-        uid: json['uid'],
-        displayName: json['display_name'],
-        email: json['email'],
-        profilePicture: json['profile_picture'],
-        createdAt: json['created_at']);
+      uid: json['uid'],
+      displayName: json['display_name'],
+      email: json['email'],
+      profilePicture: json['profile_picture'],
+      createdAt: json['created_at'],
+      lastSeen: json['last_seen'],
+      isOnline: json['is_online'],
+    );
+  }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "UserModel: $displayName + $uid";
   }
 }

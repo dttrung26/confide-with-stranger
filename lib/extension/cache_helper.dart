@@ -27,8 +27,7 @@ class CacheHelper {
     await prefs.setString(userNameKey, user.displayName);
     await prefs.setString(userEmailKey, user.email);
     await prefs.setString(userIdKey, user.uid);
-    //TODO: profile picture must be handled
-    await prefs.setString(userProfilePictureKey, user.profilePicture!);
+    await prefs.setString(userProfilePictureKey, user.profilePicture);
   }
 
   Future<String?> getCurrentUserId() async {
