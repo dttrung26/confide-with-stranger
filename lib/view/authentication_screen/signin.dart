@@ -2,7 +2,13 @@ import 'package:confide_with_stranger/service/auth.dart';
 import 'package:confide_with_stranger/view/authentication_screen/signup.dart';
 import 'package:confide_with_stranger/view/home_screen.dart';
 import 'package:confide_with_stranger/widget/common_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../model/chat_user.dart';
+import '../../model/user_model.dart';
+import '../../service/firestore_database.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
@@ -160,11 +166,18 @@ class _SignInState extends State<SignIn> {
     Authentication()
         .signInWithEmailAndPassword(
             _emailController.text, _passwordController.text)
-        .then((isSuccessful) {
+        .then((isSuccessful) async {
       if (isSuccessful) {
         setState(() {
           _isLoading = false;
         });
+        //TODO: refactor updateUser()
+        ChatUser? currentUser = await FirestoreDatabase()
+            .getUserByUid(uid: FirebaseAuth.instance.currentUser!.uid);
+        if (currentUser != null) {
+          Provider.of<UserModel>(context, listen: false)
+              .updateUser(currentUser);
+        }
         Navigator.of(context).push(
           MaterialPageRoute(builder: (context) => const HomePage()),
         );
