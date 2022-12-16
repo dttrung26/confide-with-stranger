@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../model/user_model.dart';
+import '../model/chat_user.dart';
 
 class CacheHelper {
   static String userLoggedInKey = "CFWSTR_USER_LOGGED_IN_KEY";
@@ -16,13 +16,13 @@ class CacheHelper {
   }
 
   //Get logged in user from SF
-  Future<bool?> getUserLoggedInStatus() async {
+  Future<bool> getUserLoggedInStatus() async {
     final prefs = await SharedPreferences.getInstance();
     // If user logged in, return true. Return false if otherwise
     return prefs.getBool(userLoggedInKey) ?? false;
   }
 
-  Future<void> saveUserData(UserModel user) async {
+  Future<void> saveUserData(ChatUser user) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(userNameKey, user.displayName);
     await prefs.setString(userEmailKey, user.email);

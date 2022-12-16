@@ -1,10 +1,9 @@
 import 'package:confide_with_stranger/service/auth.dart';
+import 'package:confide_with_stranger/view/authentication_screen/signin.dart';
 import 'package:confide_with_stranger/view/presence_screen/user_precense.dart';
-import 'package:confide_with_stranger/view/signin.dart';
 import 'package:custom_navigation_bar/custom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
-import '../extension/cache_helper.dart';
 import '../widget/common_widget.dart';
 import 'chat_screen/chat_list.dart';
 
@@ -21,7 +20,6 @@ class _HomePageState extends State<HomePage>
 
   @override
   void initState() {
-    _checkSignedIn();
     super.initState();
   }
 
@@ -65,19 +63,16 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  _userLogout() {
-    Authentication().signOut();
-    Navigator.of(context).canPop() ? Navigator.of(context).pop() : null;
-  }
-
-  void _checkSignedIn() async {
-    bool isSignedIn = await CacheHelper().getUserLoggedInStatus() ?? false;
-    if (!isSignedIn) {
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const SignIn()),
-          (route) => false);
-    }
+  _userLogout() async {
+    await Authentication().signOut();
+    Navigator.of(context).canPop()
+        ? Navigator.of(context).pop()
+        : Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SignIn(),
+            ),
+            (route) => false);
   }
 
   Widget _customTabbar() {

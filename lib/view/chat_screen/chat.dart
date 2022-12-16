@@ -3,14 +3,14 @@ import 'package:confide_with_stranger/widget/common_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../model/user_model.dart';
+import '../../model/chat_user.dart';
 import '../../service/firestore_database.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String currentUserId;
-  final UserModel peerUser;
+  final ChatUser peerUser;
+  final ChatUser currentUser;
   const ChatScreen(
-      {Key? key, required this.currentUserId, required this.peerUser})
+      {Key? key, required this.peerUser, required this.currentUser})
       : super(key: key);
 
   @override
@@ -22,21 +22,19 @@ class _ChatScreenState extends State<ChatScreen> {
   final firebaseFireStore = FirestoreDatabase();
   String messagesText = '';
   String chatRoomId = '';
-  //     'WxiNPb8nhKMqscq8l1FLxOiBi7P2-Y0aVHp3JeCeh623XSbLQMQZ0tas2';
-
   @override
   void initState() {
     //Compare string order of two users id to generate a unique chat room id
-    if (widget.currentUserId.compareTo(widget.peerUser.uid) > 0) {
-      chatRoomId = '${widget.peerUser.uid}-${widget.currentUserId}';
+    if (widget.currentUser.uid.compareTo(widget.peerUser.uid) > 0) {
+      chatRoomId = '${widget.peerUser.uid}-${widget.currentUser.uid}';
     } else {
-      chatRoomId = '${widget.currentUserId}-${widget.peerUser.uid}';
+      chatRoomId = '${widget.currentUser.uid}-${widget.peerUser.uid}';
     }
-    //Set additional users data in chat room
-    firebaseFireStore.setAdditionalUsersData(
-        currentUserId: widget.currentUserId,
-        peerUserId: widget.peerUser.uid,
-        docId: chatRoomId);
+    //Set initial additional users data in chat room
+    // firebaseFireStore.setInitialAdditionalChatData(
+    //     docId: chatRoomId,
+    //     currentUserId: widget.currentUser.uid,
+    //     peerUserId: widget.peerUser.uid);
     super.initState();
   }
 
@@ -92,7 +90,7 @@ class _ChatScreenState extends State<ChatScreen> {
               Flexible(
                 child: MessageStream(
                   chatRoomId: chatRoomId,
-                  currentUserId: widget.currentUserId,
+                  currentUserId: widget.currentUser.uid,
                 ),
               ),
               Row(
@@ -122,9 +120,14 @@ class _ChatScreenState extends State<ChatScreen> {
                         firebaseFireStore.sendMessage(
                             message: messagesText,
                             docId: chatRoomId,
-                            senderId: widget.currentUserId);
-                        firebaseFireStore.setAdditionalChatItemData(
-                            lastMessage: messagesText, docId: chatRoomId);
+                            senderId: widget.currentUser.uid);
+                        firebaseFireStore.setAdditionalChatData(
+                            docId: chatRoomId,
+                            currentUserId: widget.currentUser.uid,
+                            peerUserId: widget.peerUser.uid,
+                            lastMessage: messagesText);
+                        // firebaseFireStore.updateAdditionalChatData(
+                        //     lastMessage: messagesText, docId: chatRoomId);
                       }
                       messagesText = '';
                     },

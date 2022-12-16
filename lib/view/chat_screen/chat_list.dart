@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confide_with_stranger/widget/common_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../extension/cache_helper.dart';
 import '../../extension/date_time_helper.dart';
+import '../../model/chat_user.dart';
 import '../../model/user_model.dart';
 import '../../service/firestore_database.dart';
 import 'chat.dart';
@@ -16,82 +17,69 @@ class ChatList extends StatefulWidget {
 }
 
 class _ChatListState extends State<ChatList> {
-  final FirestoreDatabase _firebaseFirestore = FirestoreDatabase();
-  final Stream<QuerySnapshot> _chatListStream =
-      FirebaseFirestore.instance.collection('rooms').snapshots();
-
-  String currentUserId = '';
+  final _firebaseFirestore = FirestoreDatabase();
   @override
   void initState() {
-    //Check signIn status, navigate to login screen if user has not signed in
-    _checkSignedIn();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: _chatListStream,
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) {
-                return const Text('Something went wrong');
-              }
+    final currentUser = Provider.of<UserModel>(context, listen: false).user;
+    final chatListStream = FirebaseFirestore.instance
+        .collection('rooms')
+        .where('users', arrayContains: currentUser?.uid)
+        .snapshots();
+    return StreamBuilder<QuerySnapshot>(
+      stream: chatListStream,
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasError) {
+          return const Text("Snapshot has error");
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+        if (!snapshot.hasData) {
+          return const Text("No history chat");
+        }
+        return ListView.builder(
+            itemCount: snapshot.data?.docs.length,
+            itemBuilder: (context, index) {
+              List userIdList = snapshot.data?.docs[index].get('users');
+              var peerUserId =
+                  userIdList.firstWhere((userId) => userId != currentUser?.uid);
+              return FutureBuilder(
+                  future: _firebaseFirestore.getUserByUid(uid: peerUserId),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<ChatUser?> peerUserSnapShot) {
+                    if (snapshot.hasError) {
+                      return const Text('Something went wrong');
+                    }
 
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              }
-              return ListView(
-                children: snapshot.data!.docs
-                    .map((DocumentSnapshot documentSnapShot) {
-                      //Get peerUserId
-                      List<String> userIdsList =
-                          List<String>.from(documentSnapShot.get('users'));
-                      String peerUserId;
-                      //users array only contains 2 values: currentUserId and peerUserId
-                      peerUserId =
-                          userIdsList.firstWhere((id) => id != currentUserId);
-
-                      return FutureBuilder(
-                          future: _firebaseFirestore.getUserByUid(peerUserId),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<UserModel?> peerUserSnapShot) {
-                            if (snapshot.hasError) {
-                              return const Text('Something went wrong');
-                            }
-
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const CircularProgressIndicator();
-                            }
-                            return _buildChatItem(
-                                documentSnapShot, peerUserSnapShot.data);
-                          });
-                    })
-                    .toList()
-                    .cast(),
-              );
-            },
-          ),
-        )
-      ],
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    return _buildChatItem(
+                        snapshot.data?.docs[index].data()
+                            as Map<String, dynamic>,
+                        peerUserSnapShot.data,
+                        currentUser);
+                  });
+            });
+      },
     );
   }
 
-  Widget _buildChatItem(DocumentSnapshot snapshot, UserModel? peerUser) {
-    Map<String, dynamic> data = snapshot.data()! as Map<String, dynamic>;
+  Widget _buildChatItem(
+      Map<String, dynamic> data, ChatUser? peerUser, ChatUser? currentUser) {
     if (peerUser != null) {
       return GestureDetector(
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => ChatScreen(
-                currentUserId: currentUserId,
                 peerUser: peerUser,
+                currentUser: currentUser!,
               ),
             ),
           );
@@ -171,9 +159,5 @@ class _ChatListState extends State<ChatList> {
     } else {
       return const Text("Can't build chat item");
     }
-  }
-
-  void _checkSignedIn() async {
-    currentUserId = (await CacheHelper().getCurrentUserId())!;
   }
 }

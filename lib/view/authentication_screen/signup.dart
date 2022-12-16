@@ -1,10 +1,10 @@
 import 'package:confide_with_stranger/extension/string_helper.dart';
 import 'package:confide_with_stranger/service/auth.dart';
-import 'package:confide_with_stranger/view/signin.dart';
+import 'package:confide_with_stranger/view/authentication_screen/signin.dart';
 import 'package:confide_with_stranger/widget/common_widget.dart';
 import 'package:flutter/material.dart';
 
-import 'home_page.dart';
+import '../home_screen.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);

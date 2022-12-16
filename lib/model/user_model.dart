@@ -1,48 +1,13 @@
-class UserModel {
-  String uid;
-  String displayName;
-  String email;
-  String profilePicture;
-  String createdAt;
-  String? lastSeen;
-  bool isOnline;
+import 'package:confide_with_stranger/model/chat_user.dart';
+import 'package:flutter/material.dart';
 
-  UserModel(
-      {required this.uid,
-      required this.displayName,
-      required this.email,
-      required this.profilePicture,
-      required this.createdAt,
-      required this.isOnline,
-      this.lastSeen});
+class UserModel extends ChangeNotifier {
+  late ChatUser _user;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'created_at': createdAt,
-      'display_name': displayName,
-      'email': email,
-      'profile_picture': profilePicture,
-      'uid': uid,
-      'last_seen': lastSeen,
-      'is_online': isOnline
-    };
-  }
+  ChatUser? get user => _user;
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      uid: json['uid'],
-      displayName: json['display_name'],
-      email: json['email'],
-      profilePicture: json['profile_picture'],
-      createdAt: json['created_at'],
-      lastSeen: json['last_seen'],
-      isOnline: json['is_online'],
-    );
-  }
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return "UserModel: $displayName + $uid";
+  void updateUser(ChatUser user) {
+    _user = user;
+    notifyListeners();
   }
 }

@@ -1,8 +1,10 @@
 import 'package:confide_with_stranger/service/firestore_database.dart';
 import 'package:confide_with_stranger/view/chat_screen/chat.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../extension/cache_helper.dart';
+import '../../model/chat_user.dart';
 import '../../model/user_model.dart';
 import '../../widget/common_widget.dart';
 
@@ -15,17 +17,15 @@ class UserPresence extends StatefulWidget {
 
 class _UserPresenceState extends State<UserPresence>
     with WidgetsBindingObserver {
-  String? currentUserId;
-
+  ChatUser? get currentUser =>
+      Provider.of<UserModel>(context, listen: false).user;
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addObserver(this);
     CacheHelper().getCurrentUserId().then((value) {
       if (value != null) {
-        currentUserId = value;
-        FirestoreDatabase().setUserPresenceStatus(currentUserId!, true);
+        FirestoreDatabase().setUserPresenceStatus(currentUser!.uid, true);
       }
     });
   }
@@ -36,11 +36,12 @@ class _UserPresenceState extends State<UserPresence>
     //User goes offline
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
-      FirestoreDatabase().setUserPresenceStatus(currentUserId!, false);
+      FirestoreDatabase().setUserPresenceStatus(currentUser!.uid, false);
     }
+
     //User goes online
     if (state == AppLifecycleState.resumed) {
-      FirestoreDatabase().setUserPresenceStatus(currentUserId!, true);
+      FirestoreDatabase().setUserPresenceStatus(currentUser!.uid, true);
     }
   }
 
@@ -52,20 +53,21 @@ class _UserPresenceState extends State<UserPresence>
 
   @override
   Widget build(BuildContext context) {
+    ChatUser? currentUser = Provider.of<UserModel>(context, listen: false).user;
     return SafeArea(
       child: Center(
         child: Column(
           children: [
-            Text(currentUserId!),
+            Text(currentUser.toString()),
 
             SizedBox(
               height: 100,
               width: 300,
-              child: FutureBuilder<UserModel?>(
+              child: FutureBuilder<ChatUser?>(
                   future: FirestoreDatabase()
-                      .getOnlineUserPresence(10, currentUserId!),
+                      .getOnlineUserPresence(10, currentUser!.uid),
                   builder: (BuildContext context,
-                      AsyncSnapshot<UserModel?> userSnapshot) {
+                      AsyncSnapshot<ChatUser?> userSnapshot) {
                     if (userSnapshot.hasError) {
                       return const Text('Something went wrong');
                     }
@@ -76,12 +78,12 @@ class _UserPresenceState extends State<UserPresence>
                     }
 
                     return OutlineButton(
-                        text: "${userSnapshot.data?.toString()}",
+                        text: "Let's chat!",
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => ChatScreen(
-                                  currentUserId: currentUserId!,
+                                  currentUser: currentUser,
                                   peerUser: userSnapshot.data!),
                             ),
                           );

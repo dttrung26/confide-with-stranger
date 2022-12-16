@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confide_with_stranger/extension/logs.dart';
 
-import '../model/user_model.dart';
+import '../model/chat_user.dart';
 
 class FirestoreDatabase {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
@@ -24,7 +24,7 @@ class FirestoreDatabase {
     });
   }
 
-  Future<void> setAdditionalUsersData({
+  Future<void> updateAdditionalUsersData({
     required String currentUserId,
     required String peerUserId,
     required String docId,
@@ -34,7 +34,7 @@ class FirestoreDatabase {
     });
   }
 
-  Future<void> setAdditionalChatItemData(
+  Future<void> updateAdditionalChatData(
       {required String lastMessage, required String docId}) async {
     _firebaseFirestore.collection('rooms').doc(docId).update({
       'last_message': lastMessage,
@@ -42,12 +42,24 @@ class FirestoreDatabase {
     });
   }
 
-  Future<UserModel?> getUserByUid(String uid) async {
+  Future<void> setAdditionalChatData(
+      {required docId,
+      required currentUserId,
+      required peerUserId,
+      required lastMessage}) async {
+    _firebaseFirestore.collection('rooms').doc(docId).set({
+      'users': [currentUserId, peerUserId],
+      'last_message': lastMessage,
+      'last_message_time': DateTime.now().toString(),
+    });
+  }
+
+  Future<ChatUser?> getUserByUid({required String uid}) async {
     final docRef = _firebaseFirestore.collection("users").doc(uid);
     try {
       DocumentSnapshot doc = await docRef.get();
       final data = doc.data() as Map<String, dynamic>;
-      UserModel user = UserModel.fromJson(data);
+      ChatUser user = ChatUser.fromJson(data);
       return user;
     } catch (e) {
       printLog(e);
@@ -64,23 +76,35 @@ class FirestoreDatabase {
   }
 
 //Return a random online user who is not current user
-  Future<UserModel?> getOnlineUserPresence(
+  Future<ChatUser?> getOnlineUserPresence(
       int limit, String currentUserId) async {
+    //Replace default admin uid here if needed
+    String defaultAdminUid = 'WxiNPb8nhKMqscq8l1FLxOiBi7P2';
     final docRef = _firebaseFirestore
         .collection('users')
         .limit(limit)
         .where('is_online', isEqualTo: true);
     try {
       final value = await docRef.get();
-      int randomUserIndex = Random().nextInt(value.docs.length);
-      int currentUserIndex = value.docs
-          .indexWhere((element) => element.data()['uid'] == currentUserId);
-      //if random user index is equal to current user index
-      while (currentUserIndex == randomUserIndex) {
-        //get a new random user index
-        randomUserIndex = Random().nextInt(value.docs.length);
+      if (value.docs.length == 1) {
+        //If the only 1 online user   is the person who is using the app
+        //Then, user should chat with default account of this app developer
+        final docRef = _firebaseFirestore
+            .collection('users')
+            .where('uid', isEqualTo: defaultAdminUid);
+        final value = await docRef.get();
+        return ChatUser.fromJson(value.docs.first.data());
+      } else {
+        int randomUserIndex = Random().nextInt(value.docs.length);
+        int currentUserIndex = value.docs
+            .indexWhere((element) => element.data()['uid'] == currentUserId);
+        //if random user index is equal to current user index
+        while (currentUserIndex == randomUserIndex) {
+          //get a new random user index
+          randomUserIndex = Random().nextInt(value.docs.length);
+        }
+        return ChatUser.fromJson(value.docs.elementAt(randomUserIndex).data());
       }
-      return UserModel.fromJson(value.docs.elementAt(randomUserIndex).data());
     } catch (e) {
       printLog(e);
       return null;

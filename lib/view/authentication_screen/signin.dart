@@ -1,6 +1,6 @@
 import 'package:confide_with_stranger/service/auth.dart';
-import 'package:confide_with_stranger/view/home_page.dart';
-import 'package:confide_with_stranger/view/signup.dart';
+import 'package:confide_with_stranger/view/authentication_screen/signup.dart';
+import 'package:confide_with_stranger/view/home_screen.dart';
 import 'package:confide_with_stranger/widget/common_widget.dart';
 import 'package:flutter/material.dart';
 

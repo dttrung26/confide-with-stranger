@@ -4,7 +4,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../extension/cache_helper.dart';
 import '../extension/logs.dart';
-import '../model/user_model.dart';
+import '../model/chat_user.dart';
+import 'firestore_database.dart';
 
 enum Status {
   authenticated,
@@ -45,14 +46,16 @@ class Authentication {
             "profile_picture": firebaseUser.photoURL,
             "uid": firebaseUser.uid,
             "created_at": DateTime.now().toString(),
-            "email": firebaseUser.email
+            "email": firebaseUser.email,
+            "is_online": true,
+            "last_seen": null
           });
           //Get user fromfirebase firestore
           final docRef =
               _firebaseFirestore.collection("users").doc(firebaseUser.uid);
           docRef.get().then((DocumentSnapshot doc) {
             final data = doc.data() as Map<String, dynamic>;
-            UserModel user = UserModel.fromJson(data);
+            ChatUser user = ChatUser.fromJson(data);
             //Save user data to local cache
             CacheHelper().saveUserData(user);
           });
@@ -93,14 +96,16 @@ class Authentication {
               'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png',
           "uid": firebaseUser.uid,
           "created_at": DateTime.now().toString(),
-          "email": firebaseUser.email
+          "email": firebaseUser.email,
+          "is_online": true,
+          "last_seen": null
         });
         // Then get user data from firebase firestore
         final docRef =
             _firebaseFirestore.collection("users").doc(firebaseUser.uid);
         docRef.get().then((DocumentSnapshot doc) {
           final data = doc.data() as Map<String, dynamic>;
-          UserModel user = UserModel.fromJson(data);
+          ChatUser user = ChatUser.fromJson(data);
           // Save user data on local cache
           CacheHelper().saveUserData(user);
         });
@@ -128,7 +133,7 @@ class Authentication {
             .doc(firebaseUser.uid)
             .get();
         final data = docSnapshot.data() as Map<String, dynamic>;
-        UserModel user = UserModel.fromJson(data);
+        ChatUser user = ChatUser.fromJson(data);
         // then save user data in local cache
         CacheHelper().saveUserData(user);
         CacheHelper().setUserLoggedInStatus(true);
@@ -137,11 +142,15 @@ class Authentication {
         return false;
       }
     } catch (err) {
+      printLog(err);
       rethrow;
     }
   }
 
   Future<void> signOut() async {
+    //Set user status to offline
+    await FirestoreDatabase()
+        .setUserPresenceStatus(_firebaseAuth.currentUser!.uid, false);
     //Sign out user from Firebase
     await _firebaseAuth.signOut();
     //Delete user cache
