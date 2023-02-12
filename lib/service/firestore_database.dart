@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:confide_with_stranger/constants/app_constants.dart';
 import 'package:confide_with_stranger/extension/logs.dart';
 
 import '../model/chat_user.dart';
@@ -79,7 +80,6 @@ class FirestoreDatabase {
   Future<ChatUser?> getOnlineUserPresence(
       int limit, String currentUserId) async {
     //Replace default admin uid here if needed
-    String defaultAdminUid = 'WxiNPb8nhKMqscq8l1FLxOiBi7P2';
     final docRef = _firebaseFirestore
         .collection('users')
         .limit(limit)
@@ -87,17 +87,19 @@ class FirestoreDatabase {
     try {
       final value = await docRef.get();
       if (value.docs.length == 1) {
-        //If the only 1 online user   is the person who is using the app
-        //Then, user should chat with default account of this app developer
+        //If there is only 1 online user (person's using the app)
+        //Then return default ChatUser of this app developer
         final docRef = _firebaseFirestore
             .collection('users')
-            .where('uid', isEqualTo: defaultAdminUid);
+            .where('uid', isEqualTo: adminUid);
         final value = await docRef.get();
         return ChatUser.fromJson(value.docs.first.data());
       } else {
+        //get random user index
         int randomUserIndex = Random().nextInt(value.docs.length);
+        //get current user index
         int currentUserIndex = value.docs
-            .indexWhere((element) => element.data()['uid'] == currentUserId);
+            .indexWhere((user) => user.data()['uid'] == currentUserId);
         //if random user index is equal to current user index
         while (currentUserIndex == randomUserIndex) {
           //get a new random user index
@@ -107,6 +109,24 @@ class FirestoreDatabase {
       }
     } catch (e) {
       printLog(e);
+      return null;
+    }
+  }
+
+  Stream<QuerySnapshot>? searchUserByDisplayName(
+      {int limit = 1, String? searchText}) {
+    /*
+    Full text search is not supported atm in Firebase Firestore,
+    user can only search by exact string for now
+    */
+    //TODO: improve full text search feature by using 3rd party plugin
+    if (searchText?.isNotEmpty == true) {
+      return _firebaseFirestore
+          .collection('users')
+          .limit(limit)
+          .where("display_name", isEqualTo: searchText)
+          .snapshots();
+    } else {
       return null;
     }
   }

@@ -1,6 +1,8 @@
 import 'package:confide_with_stranger/service/auth.dart';
 import 'package:confide_with_stranger/view/authentication_screen/signin.dart';
 import 'package:confide_with_stranger/view/presence_screen/user_precense.dart';
+import 'package:confide_with_stranger/view/search_screen/search_screen.dart';
+import 'package:confide_with_stranger/view/settings_screen/settings_screen.dart';
 import 'package:custom_navigation_bar/custom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -43,27 +45,15 @@ class _HomePageState extends State<HomePage>
         children: [
           const UserPresence(),
           const ChatList(),
-          Container(
-            alignment: Alignment.center,
-            child: Text(
-              "Search Screen Here",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Container(
-            alignment: Alignment.center,
-            child: Text(
-              "Settings",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
-          ),
+          const SearchScreen(),
+          const SettingsScreen(),
         ],
       ),
       bottomNavigationBar: _customTabbar(),
     );
   }
 
-  _userLogout() async {
+  void _userLogout() async {
     await Authentication().signOut();
     Navigator.of(context).canPop()
         ? Navigator.of(context).pop()
@@ -84,16 +74,16 @@ class _HomePageState extends State<HomePage>
       backgroundColor: Color(0xff040307),
       items: [
         CustomNavigationBarItem(
-          icon: Icon(Icons.home),
+          icon: const Icon(Icons.home),
         ),
         CustomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble),
+          icon: const Icon(Icons.chat_bubble),
         ),
         CustomNavigationBarItem(
-          icon: Icon(Icons.search),
+          icon: const Icon(Icons.search),
         ),
         CustomNavigationBarItem(
-          icon: Icon(Icons.account_circle),
+          icon: const Icon(Icons.account_circle),
         ),
       ],
       currentIndex: _currentIndex,

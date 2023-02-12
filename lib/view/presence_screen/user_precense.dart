@@ -1,3 +1,4 @@
+import 'package:confide_with_stranger/constants/app_constants.dart';
 import 'package:confide_with_stranger/service/firestore_database.dart';
 import 'package:confide_with_stranger/view/chat_screen/chat.dart';
 import 'package:flutter/material.dart';
@@ -54,18 +55,21 @@ class _UserPresenceState extends State<UserPresence>
   @override
   Widget build(BuildContext context) {
     ChatUser? currentUser = Provider.of<UserModel>(context, listen: false).user;
+    Future<ChatUser?> chatUserFuture =
+        FirestoreDatabase().getOnlineUserPresence(10, currentUser!.uid);
     return SafeArea(
       child: Center(
         child: Column(
           children: [
-            Text(currentUser.toString()),
-
+            const SizedBox(
+              height: 100,
+            ),
+            // Text(currentUser.toString()),
             SizedBox(
               height: 100,
               width: 300,
               child: FutureBuilder<ChatUser?>(
-                  future: FirestoreDatabase()
-                      .getOnlineUserPresence(10, currentUser!.uid),
+                  future: chatUserFuture,
                   builder: (BuildContext context,
                       AsyncSnapshot<ChatUser?> userSnapshot) {
                     if (userSnapshot.hasError) {
@@ -77,24 +81,44 @@ class _UserPresenceState extends State<UserPresence>
                       return const CircularProgressIndicator();
                     }
 
-                    return OutlineButton(
-                        text: "Let's chat!",
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => ChatScreen(
-                                  currentUser: currentUser,
-                                  peerUser: userSnapshot.data!),
-                            ),
-                          );
-                        });
+                    return Column(
+                      children: [
+                        userSnapshot.data?.uid == adminUid
+                            ? const Text(
+                                "No online users for now. Let's talk with admin")
+                            : const SizedBox.shrink(),
+                        OutlineButton(
+                            text: "Let's chat!",
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreen(
+                                      currentUser: currentUser,
+                                      peerUser: userSnapshot.data!),
+                                ),
+                              );
+                            }),
+                      ],
+                    );
                   }),
             ),
-            // LoadingAnimatedButton(
-            //   onTap: () {},
-            //   onTapChild: const Text("Finding ..."),
-            //   child: const Text("Finding a stranger"),
-            // ),
+            const SizedBox(
+              height: 50,
+            ),
+            SizedBox(
+              height: 75,
+              width: 300,
+              child: OutlineButton(
+                onPressed: () {
+                  //Reset Begin to talk button
+                  setState(() {
+                    chatUserFuture = FirestoreDatabase()
+                        .getOnlineUserPresence(10, currentUser.uid);
+                  });
+                },
+                text: 'Find again',
+              ),
+            )
           ],
         ),
       ),

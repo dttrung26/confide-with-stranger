@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ChatUser {
   String uid;
   String displayName;
@@ -38,6 +40,17 @@ class ChatUser {
       lastSeen: json['last_seen'],
       isOnline: json['is_online'],
     );
+  }
+
+  factory ChatUser.fromDocumentSnapshot(DocumentSnapshot doc) {
+    return ChatUser(
+        profilePicture: doc.get('profile_picture'),
+        createdAt: doc.get('created_at'),
+        displayName: doc.get('display_name'),
+        uid: doc.get('uid'),
+        isOnline: doc.get('is_online'),
+        email: doc.get('email'),
+        lastSeen: doc.get('last_seen'));
   }
 
   @override

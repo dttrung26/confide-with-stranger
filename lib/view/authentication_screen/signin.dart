@@ -92,21 +92,22 @@ class _SignInState extends State<SignIn> {
                       ),
                     ],
                   ),
-                  MaterialButton(
-                    height: 64,
-                    shape: CircleBorder(
-                        side: BorderSide(color: Colors.grey.shade300)),
-                    onPressed: () {
-                      _signInByGoogle();
-                    },
-                    child: Image.asset(
-                      'assets/images/google.png',
-                      scale: 2.0,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  //TODO: enable Google Sign in
+                  // MaterialButton(
+                  //   height: 64,
+                  //   shape: CircleBorder(
+                  //       side: BorderSide(color: Colors.grey.shade300)),
+                  //   onPressed: () {
+                  //     _signInByGoogle();
+                  //   },
+                  //   child: Image.asset(
+                  //     'assets/images/google.png',
+                  //     scale: 2.0,
+                  //   ),
+                  // ),
+                  // const SizedBox(
+                  //   height: 20,
+                  // ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -162,7 +163,6 @@ class _SignInState extends State<SignIn> {
     setState(() {
       _isLoading = true;
     });
-
     Authentication()
         .signInWithEmailAndPassword(
             _emailController.text, _passwordController.text)
